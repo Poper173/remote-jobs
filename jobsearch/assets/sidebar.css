@@ -1,0 +1,28 @@
+body {
+    height: 100vh;
+    background-color: #f8f9fa;
+    font-family: 'Segoe UI', sans-serif;
+}
+
+.sidebar {
+    height: 100%;
+    background-color: #ffffff;
+    border-right: 1px solid #dee2e6;
+    padding-top: 1rem;
+}
+
+.sidebar .nav-link {
+    color: #333;
+    font-weight: 500;
+    padding: 10px 15px;
+}
+
+.sidebar .nav-link.active {
+    background-color: #007bff;
+    color: white !important;
+    border-radius: 5px;
+}
+
+.sidebar .nav-link:hover {
+    background-color: #e9ecef;
+}
