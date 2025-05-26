@@ -25,6 +25,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $company_description = trim($_POST["company_description"]);
     $post_number = trim($_POST["post_number"]);
     $skills_input = trim($_POST["skills"]); // Get skills as a comma-separated string
+    $application_start = $_POST["application_start"]; // Get application start date
+    $application_end = $_POST["application_end"]; // Get application end date
 
     // Process skills into an array
     $skills = array_map('trim', explode(',', $skills_input));
@@ -56,19 +58,18 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
         // Insert employer profile if not exists
         $user_id = $_SESSION['user_id'];
-        $stmt = $pdo->prepare("SELECT employer_id FROM employer_profiles WHERE employer_id = ? AND company_id = ?");
-        $stmt->execute([$user_id, $company_id]);
-        $employer_id = $stmt->fetchColumn();
+        $stmt = $pdo->prepare("SELECT COUNT(*) FROM employer_profiles WHERE employer_id = ?");
+        $stmt->execute([$user_id]);
+        $employer_exists = $stmt->fetchColumn();
 
-        if (!$employer_id) {
+        if (!$employer_exists) {
             $stmt = $pdo->prepare("INSERT INTO employer_profiles (employer_id, company_id, employer_name, created_at) VALUES (?, ?, ?, NOW())");
             $stmt->execute([$user_id, $company_id, $company_name]);
-            $employer_id = $user_id; // Use the session user_id as employer_id
         }
 
         // Insert job post
-        $stmt = $pdo->prepare("INSERT INTO job_posts (employer_id, employer_name, title, category_id, location_id, salary_range, company_id, post_number, application_start, application_end, duties, qualifications, posted_at, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW(), DATE_ADD(NOW(), INTERVAL 30 DAY), ?, ?, NOW(), 'active')");
-        $stmt->execute([$employer_id, $company_name, $job_title, $category_id, $location_id, $salary_range, $company_id, $post_number, $job_description, $job_description]);
+        $stmt = $pdo->prepare("INSERT INTO job_posts (employer_id, employer_name, title, category_id, location_id, salary_range, company_id, post_number, application_start, application_end, duties, qualifications, posted_at, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), 'active')");
+        $stmt->execute([$user_id, $company_name, $job_title, $category_id, $location_id, $salary_range, $company_id, $post_number, $application_start, $application_end, $job_description, $job_description]);
         $job_id = $pdo->lastInsertId();
 
         // Insert job skills
@@ -274,6 +275,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                             <div class="mb-3">
                                 <label class="form-label">Company Description</label>
                                 <textarea class="form-control" name="company_description" required></textarea>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Application Start Date</label>
+                                <input type="date" class="form-control" name="application_start" required>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Application End Date</label>
+                                <input type="date" class="form-control" name="application_end" required>
                             </div>
                             <div class="mb-3">
                                 <label class="form-label">Required Skills (Separate skills with commas)</label>
